@@ -80,6 +80,30 @@ except ValidationError as message:
 
 
 
+# Ahora vamos a intentar validar una mayoria de edad y además que sea positivo.
+
+from pydantic import PositiveInt
+
+class OlderNPositive(BaseModel):
+    name: str
+    age: PositiveInt # Como podemos observar no es necesario asignar un validador para numeros positivos.
+    email: str
+
+    @field_validator("age")
+    @classmethod
+    def age_validator(cls, value: int):
+        if value < 18:
+            raise ValueError("You must be over 18")
+        return value
+
+
+try: 
+    Fidel = OlderNPositive(name="fidel", age=21, email="fidel@gmail.com")
+    print(Fidel.model_dump())
+
+except ValidationError as message:
+    print(message)
+
 
 
 
