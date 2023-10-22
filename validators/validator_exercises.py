@@ -107,11 +107,25 @@ except ValidationError as message:
 
 
 
+# Now we're gonna try to verify the times of field_validators (Before, After, Plain):
 
+class TimesProof(BaseModel):
 
+    name: str
+    surname: str
+    age: PositiveInt
 
+    @field_validator("age", mode="before")#Proved with "before", in efect by doing before validates the classmethod
+    @classmethod
+    def age_older(cls, age):
+        if age < 18:
+            raise ValueError("You have to be older")
+        return age
+    
+try:
+    Bernardo = TimesProof(name="Bernardo", surname="Velasquez", age=-3)
+    print(Bernardo.model_dump())
 
+except ValidationError as message:
+    print(message)
 
-
-
-        
