@@ -129,3 +129,76 @@ try:
 except ValidationError as message:
     print(message)
 
+
+
+
+# Let's make some exercises to practice field_validator and FieldValidationInfo. Also ValidatioError.
+
+from pydantic import (
+    BaseModel,
+    field_validator,
+    FieldValidationInfo,
+    ValidationError, 
+    Field,
+    PrivateAttr,
+
+)
+from typing import List
+import re
+
+class ExerciseWithFieldValidationInfo(BaseModel):
+    name: str 
+    age: int
+    hobbies: List[str]
+    email: str 
+
+
+    """Validating the minimun amount of hobbies"""
+    @field_validator("hobbies")
+    @classmethod
+    def hobbies_validator(cls, value: List, aditional_info: FieldValidationInfo):
+        if len(value) < 2:
+            raise ValueError(f"{aditional_info.field_name} must have at least 3 hobbies.")
+        
+        return value
+    
+
+    """Validating there is not numbers in the name"""
+    @field_validator("name")
+    @classmethod
+    def name_validator(cls, value: str):
+        pattern = r"[a-zA-Z]{1,}"
+        result = re.findall(pattern, value)
+
+        if len(value) < 1:
+            raise ValueError("Name must have more than 1 word")
+        
+        if len(value) != len(result[0]):
+            raise ValueError("Name must have only words")
+        
+        return value
+    
+    
+    """Validating age based on over age"""
+    @field_validator("age")
+    @classmethod
+    def age_validator(cls, value: int):
+        if value < 18:
+            raise ValueError("You must be over 18 years old")
+        
+        return value
+
+
+
+try:
+    samuel = ExerciseWithFieldValidationInfo(
+    name="samuel",
+    age=19,
+    hobbies=["platino", "going hiking", "swimming", "camping", "porning"],
+    email="samuel@gmail.com"
+)
+    print(samuel.model_dump())
+
+except ValidationError as message:
+    print(message)
+
