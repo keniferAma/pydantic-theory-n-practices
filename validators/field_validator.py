@@ -24,6 +24,8 @@ class UserModel(BaseModel):
     # you can select multiple fields, or use '*' to select all fields
     @field_validator('id', 'name')
     @classmethod
+    # REMEMBER: First value is the "cls", second is the value (we can name it as we want)
+    # and third if we want is FiedValidationInfo
     def check_alphanumeric(cls, v: str, info: FieldValidationInfo) -> str:
         if isinstance(v, str):
             # info.field_name is the name of the field being validated
