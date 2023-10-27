@@ -229,7 +229,17 @@ class PasswordCheck(BaseModel):
             raise ValueError(f"The {more_info.field_name} length must be longer than 5")
         return value
     
-    @model_validator(mode="after")
+    @model_validator(mode="after") # No estamos usando un método de clase para after debido a que se activa una vez
+    # la instancia está creada y por consiguiente ya tenemos nuestra validación hecha por basemodel, es decir
+    # que ya tenemos a nuestra disposición todos los campos, por ello simplemente usamos self como nuestro argumento
+    # y desde aquí simplemente llamamos a los campos que deseamos intervenir. CASO CONTRARIO pasa cuando usamos modo=before
+    # ya que aún no tenemos un modelo validado por pydantic y por consiguiente no tenemos una instancia. En este caso
+    # debemos usar métodos de clase que se ejecutan directamente desde la clase y no desde una instancia. 
+    # Para recordar que cuando usamos métodos de clase con model_validator ya que usamos métodos de clase, el primer 
+    # argumento es bien sabido que es "cls", el segundo nuestro valor (podemos dar cualquier valor) y ya si queremos
+    # dar un tercer argumento entonces lo podemos hacer con FieldValidationInfo, el cual usamos para obtener información 
+    # adicional como el nombre del campo que nos falla durante la validación, y otros más que obtenemos una vez instanciamos
+    # dicha función de información adicional.
     def cheking_passwords_match(self) -> "PasswordCheck":
         psw1 = self.password1
         psw2 = self.password2
@@ -245,4 +255,3 @@ try:
 except ValidationError as message:
     print(message)
 
-    
