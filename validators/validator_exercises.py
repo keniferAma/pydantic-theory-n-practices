@@ -202,3 +202,47 @@ try:
 except ValidationError as message:
     print(message)
 
+
+
+
+###### model_validator exercises #####
+
+from pydantic import BaseModel, model_validator, ValidationError, Field
+import random
+import string
+
+def random_passwords() -> str:
+    password = random.choices(string.ascii_lowercase, k=5)
+    return "".join(password)
+
+
+class PasswordCheck(BaseModel):
+    name: str 
+    password1: str = Field(default=random_passwords())
+    password2: str
+    expiration: int
+
+    @field_validator("password1", "password2")
+    @classmethod
+    def password_length(cls, value: str, more_info: FieldValidationInfo): 
+        if len(value) < 5:
+            raise ValueError(f"The {more_info.field_name} length must be longer than 5")
+        return value
+    
+    @model_validator(mode="after")
+    def cheking_passwords_match(self) -> "PasswordCheck":
+        psw1 = self.password1
+        psw2 = self.password2
+
+        if psw1 is not None and psw2 is not None and psw1 != psw2:
+            raise ValueError("The passwords do not match")
+        return self
+    
+try:
+    ramiro = PasswordCheck(name="Ramiro", password2="xyztg", expiration=12)
+    print(ramiro)
+
+except ValidationError as message:
+    print(message)
+
+    
