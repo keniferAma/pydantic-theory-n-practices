@@ -255,3 +255,64 @@ try:
 except ValidationError as message:
     print(message)
 
+
+# let's try to practic PydanticCustomError
+
+from pydantic_core import PydanticCustomError
+
+class CustomErrorPractice(BaseModel):
+    name: str
+    surname: str
+    age: int
+
+    @model_validator(mode="after")
+    def length_of_strings(self, values) -> "CustomErrorPractice":
+        name_length = self.name
+        surname_length = self.surname
+
+        if len(name_length) < 1 or len(surname_length) < 1:
+            raise PydanticCustomError(
+                "length error",
+                "{name} and {surname} is the answer",
+                {"number": values, "surname": values}
+                
+            )
+        return self
+
+try:
+    jose = CustomErrorPractice(name="", surname="hortua", age=23)
+    print(jose)
+
+except ValidationError as message:
+    print(message)
+
+
+
+
+
+# proves with field_validator and classmethod:
+
+class CustomError(BaseModel):
+    age: int
+
+    @field_validator("age")
+    @classmethod
+    def length_of_strings(cls, values) -> int:
+        if values < 18:
+            raise PydanticCustomError(
+                "age error",
+                "{age} must be older", # the name between braces must be the same field name we are parsing. 
+                {"age": values}
+            )
+        
+        return values
+try:
+    albertino = CustomError(age=12)
+    print(albertino)
+
+except ValidationError as message:
+    print(message)
+
+# One conclusion we can define on this two PydanticCustomError exercises is that we only got the result we wanted
+# with "field_validator" instead of "model_validator", besides we used a classmodel decorator to make this last one exercise 
+# works correctly. or aparently does not work with several fields at the same time.
