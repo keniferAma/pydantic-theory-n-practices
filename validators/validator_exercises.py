@@ -316,3 +316,22 @@ except ValidationError as message:
 # One conclusion we can define on this two PydanticCustomError exercises is that we only got the result we wanted
 # with "field_validator" instead of "model_validator", besides we used a classmodel decorator to make this last one exercise 
 # works correctly. or aparently does not work with several fields at the same time.
+
+
+
+
+
+
+### SkipValidation practices, but this time with pydantic validation ###
+from pydantic import SkipValidation
+
+class Skip(BaseModel):
+    name: SkipValidation[str] # HERE we set to SKIP the name field parsing, so we can give whatever type of data as argument.
+    surname: str
+    hobbies: List[SkipValidation[str]] # AND here happens the same with hobbies field.
+
+try:
+    jose = Skip(name=1, surname="alarcon", hobbies=["playing soccer", 12])
+    print(jose)
+except ValidationError as message:
+    print(message)
