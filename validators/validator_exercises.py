@@ -335,3 +335,35 @@ try:
     print(jose)
 except ValidationError as message:
     print(message)
+
+
+
+
+
+
+#### SkipValidation practices ####
+#### But went wrong because we realized that basic oriented object programation doesn't parse information ####
+
+from pydantic import InstanceOf
+
+class Person:
+    def __init__(self, name: str, surname: str, age: int) -> None:
+        self.name = name 
+        self.surname = surname
+        self.age = age
+
+
+class Employee(Person):
+    def __init__(self, name: str, surname: str, age: int, role: str) -> None:
+        super().__init__(name, surname, age)
+
+        self.role = role
+
+    def __repr__(self) -> str:
+        return f"{self.name}"
+
+
+alfredo = Employee(12, "amariles", 21, "electrician")
+print(alfredo)
+
+
