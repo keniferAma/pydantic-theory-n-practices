@@ -367,3 +367,49 @@ alfredo = Employee(12, "amariles", 21, "electrician")
 print(alfredo)
 
 
+
+
+
+#### some InstanceOf practices ####
+
+from dataclasses import dataclass
+from pydantic import InstanceOf
+
+@dataclass
+class Person:
+    name: str
+    surname: str
+    age: int
+
+
+@dataclass
+class Employee(Person):
+    role: List[str]
+
+
+@dataclass
+class Strange:
+    name: str
+    surname: str
+
+
+class Personal(BaseModel):
+    illness: InstanceOf[Person]
+
+
+
+carlos = Employee("carlos", "velez", 76, ["soccer", "walking"])
+
+fernando = Strange("fernando", "hernandez")
+
+try:
+    kayden = Personal(illness=fernando) # Giving instance from another class.
+    print(kayden)
+
+except ValidationError as message:
+    print(message)
+
+"""Input should be an instance of Person [type=is_instance_of, input_value=Strange(name='fernando', surname='hernandez'), input_type=Strange] 
+    For further information visit https://errors.pydantic.dev/2.1/v/is_instance_of"""
+
+## PROVED ##
