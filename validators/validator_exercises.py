@@ -129,3 +129,287 @@ try:
 except ValidationError as message:
     print(message)
 
+
+
+
+# Let's make some exercises to practice field_validator and FieldValidationInfo. Also ValidatioError.
+
+from pydantic import (
+    BaseModel,
+    field_validator,
+    FieldValidationInfo,
+    ValidationError, 
+    Field,
+    PrivateAttr,
+
+)
+from typing import List
+import re
+
+class ExerciseWithFieldValidationInfo(BaseModel):
+    name: str 
+    age: int
+    hobbies: List[str]
+    email: str 
+
+
+    """Validating the minimun amount of hobbies"""
+    @field_validator("hobbies")
+    @classmethod
+    def hobbies_validator(cls, value: List, aditional_info: FieldValidationInfo):
+        if len(value) < 2:
+            raise ValueError(f"{aditional_info.field_name} must have at least 3 hobbies.")
+        
+        return value
+    
+
+    """Validating there is not numbers in the name"""
+    @field_validator("name")
+    @classmethod
+    def name_validator(cls, value: str):
+        pattern = r"[a-zA-Z]{1,}"
+        result = re.findall(pattern, value)
+
+        if len(value) < 1:
+            raise ValueError("Name must have more than 1 word")
+        
+        if len(value) != len(result[0]):
+            raise ValueError("Name must have only words")
+        
+        return value
+    
+    
+    """Validating age based on over age"""
+    @field_validator("age")
+    @classmethod
+    def age_validator(cls, value: int):
+        if value < 18:
+            raise ValueError("You must be over 18 years old")
+        
+        return value
+
+
+
+try:
+    samuel = ExerciseWithFieldValidationInfo(
+    name="samuel",
+    age=19,
+    hobbies=["platino", "going hiking", "swimming", "camping", "porning"],
+    email="samuel@gmail.com"
+)
+    print(samuel.model_dump())
+
+except ValidationError as message:
+    print(message)
+
+
+
+
+###### model_validator exercises #####
+
+from pydantic import BaseModel, model_validator, ValidationError, Field
+import random
+import string
+
+def random_passwords() -> str:
+    password = random.choices(string.ascii_lowercase, k=5)
+    return "".join(password)
+
+
+class PasswordCheck(BaseModel):
+    name: str 
+    password1: str = Field(default=random_passwords())
+    password2: str
+    expiration: int
+
+    @field_validator("password1", "password2")
+    @classmethod
+    def password_length(cls, value: str, more_info: FieldValidationInfo): 
+        if len(value) < 5:
+            raise ValueError(f"The {more_info.field_name} length must be longer than 5")
+        return value
+    
+    @model_validator(mode="after") # No estamos usando un método de clase para after debido a que se activa una vez
+    # la instancia está creada y por consiguiente ya tenemos nuestra validación hecha por basemodel, es decir
+    # que ya tenemos a nuestra disposición todos los campos, por ello simplemente usamos self como nuestro argumento
+    # y desde aquí simplemente llamamos a los campos que deseamos intervenir. CASO CONTRARIO pasa cuando usamos modo=before
+    # ya que aún no tenemos un modelo validado por pydantic y por consiguiente no tenemos una instancia. En este caso
+    # debemos usar métodos de clase que se ejecutan directamente desde la clase y no desde una instancia. 
+    # Para recordar que cuando usamos métodos de clase con model_validator ya que usamos métodos de clase, el primer 
+    # argumento es bien sabido que es "cls", el segundo nuestro valor (podemos dar cualquier valor) y ya si queremos
+    # dar un tercer argumento entonces lo podemos hacer con FieldValidationInfo, el cual usamos para obtener información 
+    # adicional como el nombre del campo que nos falla durante la validación, y otros más que obtenemos una vez instanciamos
+    # dicha función de información adicional.
+    def cheking_passwords_match(self) -> "PasswordCheck":
+        psw1 = self.password1
+        psw2 = self.password2
+
+        if psw1 is not None and psw2 is not None and psw1 != psw2:
+            raise ValueError("The passwords do not match")
+        return self
+    
+try:
+    ramiro = PasswordCheck(name="Ramiro", password2="xyztg", expiration=12)
+    print(ramiro)
+
+except ValidationError as message:
+    print(message)
+
+
+# let's try to practic PydanticCustomError
+
+from pydantic_core import PydanticCustomError
+
+class CustomErrorPractice(BaseModel):
+    name: str
+    surname: str
+    age: int
+
+    @model_validator(mode="after")
+    def length_of_strings(self, values) -> "CustomErrorPractice":
+        name_length = self.name
+        surname_length = self.surname
+
+        if len(name_length) < 1 or len(surname_length) < 1:
+            raise PydanticCustomError(
+                "length error",
+                "{name} and {surname} is the answer",
+                {"number": values, "surname": values}
+                
+            )
+        return self
+
+try:
+    jose = CustomErrorPractice(name="", surname="hortua", age=23)
+    print(jose)
+
+except ValidationError as message:
+    print(message)
+
+
+
+
+
+# proves with field_validator and classmethod:
+
+class CustomError(BaseModel):
+    age: int
+
+    @field_validator("age")
+    @classmethod
+    def length_of_strings(cls, values) -> int:
+        if values < 18:
+            raise PydanticCustomError(
+                "age error",
+                "{age} must be older", # the name between braces must be the same field name we are parsing. 
+                {"age": values}
+            )
+        
+        return values
+try:
+    albertino = CustomError(age=12)
+    print(albertino)
+
+except ValidationError as message:
+    print(message)
+
+# One conclusion we can define on this two PydanticCustomError exercises is that we only got the result we wanted
+# with "field_validator" instead of "model_validator", besides we used a classmodel decorator to make this last one exercise 
+# works correctly. or aparently does not work with several fields at the same time.
+
+
+
+
+
+
+### SkipValidation practices, but this time with pydantic validation ###
+from pydantic import SkipValidation
+
+class Skip(BaseModel):
+    name: SkipValidation[str] # HERE we set to SKIP the name field parsing, so we can give whatever type of data as argument.
+    surname: str
+    hobbies: List[SkipValidation[str]] # AND here happens the same with hobbies field.
+
+try:
+    jose = Skip(name=1, surname="alarcon", hobbies=["playing soccer", 12])
+    print(jose)
+except ValidationError as message:
+    print(message)
+
+
+
+
+
+
+#### SkipValidation practices ####
+#### But went wrong because we realized that basic oriented object programation doesn't parse information ####
+
+from pydantic import InstanceOf
+
+class Person:
+    def __init__(self, name: str, surname: str, age: int) -> None:
+        self.name = name 
+        self.surname = surname
+        self.age = age
+
+
+class Employee(Person):
+    def __init__(self, name: str, surname: str, age: int, role: str) -> None:
+        super().__init__(name, surname, age)
+
+        self.role = role
+
+    def __repr__(self) -> str:
+        return f"{self.name}"
+
+
+alfredo = Employee(12, "amariles", 21, "electrician")
+print(alfredo)
+
+
+
+
+
+#### some InstanceOf practices ####
+
+from dataclasses import dataclass
+from pydantic import InstanceOf
+
+@dataclass
+class Person:
+    name: str
+    surname: str
+    age: int
+
+
+@dataclass
+class Employee(Person):
+    role: List[str]
+
+
+@dataclass
+class Strange:
+    name: str
+    surname: str
+
+
+class Personal(BaseModel):
+    illness: InstanceOf[Person]
+
+
+
+carlos = Employee("carlos", "velez", 76, ["soccer", "walking"])
+
+fernando = Strange("fernando", "hernandez")
+
+try:
+    kayden = Personal(illness=fernando) # Giving instance from another class.
+    print(kayden)
+
+except ValidationError as message:
+    print(message)
+
+"""Input should be an instance of Person [type=is_instance_of, input_value=Strange(name='fernando', surname='hernandez'), input_type=Strange] 
+    For further information visit https://errors.pydantic.dev/2.1/v/is_instance_of"""
+
+## PROVED ##
