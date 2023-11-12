@@ -413,3 +413,33 @@ except ValidationError as message:
     For further information visit https://errors.pydantic.dev/2.1/v/is_instance_of"""
 
 ## PROVED ##
+
+
+
+
+#### pydantic.dataclasses ####
+
+from pydantic.dataclasses import dataclass
+
+
+@dataclass
+class DataclassProve:
+    name: str
+    surname: str
+    age: int
+
+    @field_validator("age", mode="before")
+    @classmethod
+    def multipling_age(cls, value):
+        if isinstance(value, int):
+            return value * 2
+        
+        return value
+        
+
+amparo = DataclassProve("amparo", "ceron", "44") # field_validator is acting like it had a basemodel, I mean, it parses the type in
+# before like it was with basemodel.
+print(amparo)
+        
+
+    
