@@ -440,6 +440,69 @@ class DataclassProve:
 amparo = DataclassProve("amparo", "ceron", "44") # field_validator is acting like it had a basemodel, I mean, it parses the type in
 # before like it was with basemodel.
 print(amparo)
+
+
+import json
+from pydantic import BaseModel, field_validator, InstanceOf
+from typing import List, Optional
+
+
+
+
+class MayoresEdadError(Exception):
+    def __init__(self, value, message) -> None:
+        self.value = value
+        self.message = message
+
+        super().__init__(message)
+
+
+class PersonasJson(BaseModel):
+    nombre: str
+    apellido: str
+    edad: int
+    estado_civil: str
+    ciudad_de_residencia: str
+    sexo: str
+    hobbies: Optional[list[str]]
+    modificaciones_corporales: bool
+
+    @field_validator("edad")
+    @classmethod
+    def mayores_de_edad(cls, value) -> None:
+        if value < 18:
+            raise MayoresEdadError(value=value, message="Legal age only.")
+        
+        return value
         
 
+
+path = "c:/Users/kenifer/Desktop/pruebas-json/personas.json"
+
+with open(path) as file:
+    data = json.load(file)
     
+
+try:
+    informacion_global: List[InstanceOf[PersonasJson]] = [PersonasJson(**item) for item in data]
+    print(informacion_global)
+
+except MayoresEdadError as message:
+    print(dict(message))
+
+
+
+def selector(nombre: str):
+    for i, x in enumerate(informacion_global):
+        if x.nombre == nombre:
+            return informacion_global[i]
+    
+    raise MayoresEdadError(value=nombre, message="No fue posible encontrar")
+
+
+
+try:
+    print(selector("guillermo"))
+
+except MayoresEdadError as m:
+    print(f'{m.message} a {m.value}')
