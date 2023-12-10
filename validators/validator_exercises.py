@@ -522,9 +522,9 @@ user_registation_path = 'C:/Users/kenifer/Desktop/pruebas-json/english-database.
 with open(user_registation_path) as user_registation_file:
     information = json.load(user_registation_file)
 
-class UserRegistrationError:
+class UserRegistrationError(Exception):
     """Making a custom validation error handler for this challenge"""
-    def __init__(self, value: None, message: str) -> None:
+    def __init__(self, message=None, value=None) -> None:
         self.value = value
         self.message = message
 
@@ -538,33 +538,30 @@ class UserRegistation(BaseModel):
     @field_validator('username')
     @classmethod
     def username_validator(cls, value):        
-        pattern_for_regular = r'[a-z0-9_]'
+        pattern_for_regular = r'[a-z0-9_]{1,}'
         result_regular = re.match(pattern_for_regular, value)
 
-        if result_regular != len(value):
-            raise ValueError
+        if not result_regular:
+            raise UserRegistrationError(message='Username error: only allowed lowercase and underscore.')
+                                        
+        start, end = result_regular.span()
+
+        if value != value[start: end]:
+            raise UserRegistrationError(message='Username error: only allowed lowercase and underscore.')
         
         if len(value) < 3 or len(value) > 30:
-            raise ValueError
+            raise UserRegistrationError(message='Username error: max lenght between 3-30 characters only.')
         
         return value
+
     
 try:
     general_information: List[UserRegistation] = [UserRegistation(**item) for item in information['users']]
-    print(general_information[1].password)
-                                       
-
-except ValidationError as msj:
-    print(msj)
     
-
-string_to_practice = 'alberto_'
-pattern_for_regular = r'[a-z0-9_]{1,}'
-result_regular = re.search(pattern_for_regular, string_to_practice)
-print(result_regular)
-
-# inicio, fin = result_regular
-# print(alberto[inicio: fin])
+                                       
+except UserRegistrationError as msj:
+    print(msj.message)
+    
 
 
 
