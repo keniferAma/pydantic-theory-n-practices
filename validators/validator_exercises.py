@@ -506,3 +506,66 @@ try:
 
 except MayoresEdadError as m:
     print(f'{m.message} a {m.value}')
+
+
+
+
+
+
+# User registation: challenge suggested by artificial inteligence #
+
+import re
+import json
+
+user_registation_path = 'C:/Users/kenifer/Desktop/pruebas-json/english-database.json'
+
+with open(user_registation_path) as user_registation_file:
+    information = json.load(user_registation_file)
+
+class UserRegistrationError:
+    """Making a custom validation error handler for this challenge"""
+    def __init__(self, value: None, message: str) -> None:
+        self.value = value
+        self.message = message
+
+
+class UserRegistation(BaseModel):
+    username: str
+    password: str
+    email: str
+    date_of_birth: str
+
+    @field_validator('username')
+    @classmethod
+    def username_validator(cls, value):        
+        pattern_for_regular = r'[a-z0-9_]'
+        result_regular = re.match(pattern_for_regular, value)
+
+        if result_regular != len(value):
+            raise ValueError
+        
+        if len(value) < 3 or len(value) > 30:
+            raise ValueError
+        
+        return value
+    
+try:
+    general_information: List[UserRegistation] = [UserRegistation(**item) for item in information['users']]
+    print(general_information[1].password)
+                                       
+
+except ValidationError as msj:
+    print(msj)
+    
+
+string_to_practice = 'alberto_'
+pattern_for_regular = r'[a-z0-9_]{1,}'
+result_regular = re.search(pattern_for_regular, string_to_practice)
+print(result_regular)
+
+# inicio, fin = result_regular
+# print(alberto[inicio: fin])
+
+
+
+
