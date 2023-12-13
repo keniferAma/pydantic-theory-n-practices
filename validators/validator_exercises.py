@@ -538,8 +538,8 @@ class UserRegistation(BaseModel):
     @field_validator('username')
     @classmethod
     def username_validator(cls, value):        
-        pattern_for_regular = r'[a-z0-9_]{1,}'
-        result_regular = re.match(pattern_for_regular, value)
+        username_pattern = r'[a-z0-9_]{1,}'
+        result_regular = re.match(username_pattern, value)
 
         if not result_regular:
             raise UserRegistrationError(message='Username error: only allowed lowercase and underscore.')
@@ -554,7 +554,49 @@ class UserRegistation(BaseModel):
         
         return value
 
+
+    @field_validator('password')
+    @classmethod
+    def password_validation(cls, value):
+        """making a password validation entrance"""
+        if len(value) <= 8:
+            raise UserRegistrationError(message='The password must have at least 8 characters.')
+        
+        password_pattern = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$' # REMEMBER THAT "=?" ALLOWS US TO SEARCH
+        # WITHOUT SPENDING CHARACTERS, WHICH IS GOOD FOR THIS PURPOSE.
+        # We also remeber that the dot '.' means whatever character and the asterisc '*' means that character
+        # must be 0 or more and before the following character which are [a-z], [A-Z] and '\d'.
+
+        result_for_regular = re.search(password_pattern, value)
+        if not result_for_regular:
+            raise UserRegistrationError(value=value, 
+                                        message='Password error: the password does not fit the requirement.')
+        
+        start, end = result_for_regular.span()
+        if value != value[start: end]:
+            raise UserRegistrationError(value=value, 
+                                        message='Password error: the password does not fit the requirement.')
+
+        return value
     
+    
+    @field_validator('email')
+    @classmethod
+    def email_validator(cls, value):
+        """making a validator to check if the email is indeed a email"""
+
+        email_pattern =  r'^[a-zA-Z0-9_]{5,}@[a-z]{5,}(?:\.(?:edu|com))?\.(?:com|es|co)$'
+        pattern_result = re.findall(email_pattern, value)
+
+        if not pattern_result:
+            raise UserRegistrationError(message='email_error: the email does not match the requirements.')
+        
+        if len(pattern_result[0]) != len(value):
+            raise UserRegistrationError(message='email_error: the email does not match the requirements.')
+
+        return value
+
+
 try:
     general_information: List[UserRegistation] = [UserRegistation(**item) for item in information['users']]
     
@@ -565,4 +607,14 @@ except UserRegistrationError as msj:
 
 
 
-
+# SOME NOTATIONS RELATED WITH REGULAR EXPRESSIONS #
+pattern_to_practice = r'^[a-zA-Z0-9_]{5,}@[a-z]{5,}(?:\.(?:edu|com))?\.(?:com|es|co)$'
+"""IMPORTANT
+WHEN WE USE 'findall', THIS FEATURE HAS LIKE A 'PRIORITY' WITH WHAT IS INSIDE OF PARENTESIS, SO IF WE DON'T USE '?:'(non-overlapping)
+findall WILL GIVES US ONLY THE MATCHES THAT ARE INSIDE OF THE PARENTHESIS. SO THAT'S THE REASON WHY WE COULDN'T GET THE SAME
+RESULT AS WE DID WITH 'match'.
+also to remember: 'findall' gives all the ocurrences that finds in the entire string, even if they are in separate
+parts of the string, while 'match' will gives ud the entire ocurrences, from the start to the end. (aparently
+it doesn't match what is inside of the parentesis first)""" 
+result = re.findall(pattern_to_practice, 'kenifer@gmail.edu.co')
+print(result)
