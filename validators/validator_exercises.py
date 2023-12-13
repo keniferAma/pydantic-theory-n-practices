@@ -580,6 +580,23 @@ class UserRegistation(BaseModel):
         return value
     
     
+    @field_validator('email')
+    @classmethod
+    def email_validator(cls, value):
+        """making a validator to check if the email is indeed a email"""
+
+        email_pattern =  r'^[a-zA-Z0-9_]{5,}@[a-z]{5,}(?:\.(?:edu|com))?\.(?:com|es|co)$'
+        pattern_result = re.findall(email_pattern, value)
+
+        if not pattern_result:
+            raise UserRegistrationError(message='email_error: the email does not match the requirements.')
+        
+        if len(pattern_result[0]) != len(value):
+            raise UserRegistrationError(message='email_error: the email does not match the requirements.')
+
+        return value
+
+
 try:
     general_information: List[UserRegistation] = [UserRegistation(**item) for item in information['users']]
     
@@ -590,4 +607,14 @@ except UserRegistrationError as msj:
 
 
 
-
+# SOME NOTATIONS RELATED WITH REGULAR EXPRESSIONS #
+pattern_to_practice = r'^[a-zA-Z0-9_]{5,}@[a-z]{5,}(?:\.(?:edu|com))?\.(?:com|es|co)$'
+"""IMPORTANT
+WHEN WE USE 'findall', THIS FEATURE HAS LIKE A 'PRIORITY' WITH WHAT IS INSIDE OF PARENTESIS, SO IF WE DON'T USE '?:'(non-overlapping)
+findall WILL GIVES US ONLY THE MATCHES THAT ARE INSIDE OF THE PARENTHESIS. SO THAT'S THE REASON WHY WE COULDN'T GET THE SAME
+RESULT AS WE DID WITH 'match'.
+also to remember: 'findall' gives all the ocurrences that finds in the entire string, even if they are in separate
+parts of the string, while 'match' will gives ud the entire ocurrences, from the start to the end. (aparently
+it doesn't match what is inside of the parentesis first)""" 
+result = re.findall(pattern_to_practice, 'kenifer@gmail.edu.co')
+print(result)
