@@ -516,6 +516,7 @@ except MayoresEdadError as m:
 
 import re
 import json
+from datetime import date, timedelta, datetime
 
 user_registation_path = 'C:/Users/kenifer/Desktop/pruebas-json/english-database.json'
 
@@ -595,7 +596,33 @@ class UserRegistation(BaseModel):
             raise UserRegistrationError(message='email_error: the email does not match the requirements.')
 
         return value
+    
 
+    @field_validator('date_of_birth')
+    @classmethod
+    def date_of_birth_validator(cls, value):
+        """making a validator to chek date_of_birth"""
+        date_of_birth_pattern = r'^[0-9]{4}(-|/)[0-9]{1,2}(-|/)[0-9]{1,2}$'
+        result_regular = re.findall(date_of_birth_pattern, value)
+
+        if not result_regular:
+            raise UserRegistrationError({'date_error': 'the date is invalid.'})
+
+        
+        actual_date = date.today()
+        actual_day = actual_date.day
+        actual_month = actual_date.month
+        actual_year = actual_date.year
+
+        age_mayority = (datetime(day=actual_day, month=actual_month, year=actual_year) - 
+                        datetime(year=int(value[:4]), month=int(value[5:7]), day=int(value[8:10])))
+                                                                                                 
+
+        if age_mayority.days < 6575:
+            raise UserRegistrationError({'date_error': 'You must be older than 18'})
+        
+        return value
+    
 
 try:
     general_information: List[UserRegistation] = [UserRegistation(**item) for item in information['users']]
