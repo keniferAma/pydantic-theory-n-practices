@@ -520,8 +520,30 @@ from datetime import date, timedelta, datetime
 
 user_registation_path = 'C:/Users/kenifer/Desktop/pruebas-json/english-database.json'
 
-with open(user_registation_path) as user_registation_file:
-    information = json.load(user_registation_file)
+
+"""
+To remember, implementing a file error handling is a good practice, specially when it is developes outside
+of the classes. when inside, it is also a good practice implementing a try-except error due to the extra information
+we can get from the python warnings. Also remember that we're using """
+try:
+    with open(user_registation_path) as user_registation_file:
+        information = json.load(user_registation_file)
+
+except FileNotFoundError:
+    print(f'The file {user_registation_path} did not work.')
+
+except PermissionError:
+    print(f"Permission denied when trying to open the file {user_registation_path}")
+
+except json.JSONDecodeError:
+    print(f'The file {user_registation_path} does not contain a valid JSON.')
+
+
+# Remember that we're printing the exception outputs, even though we should implement 'raise' errors due to 
+# the severity of not finding a file. This also applies when the json loader or file reader is inside the class 
+# (usually implemented when the file is too large).
+
+
 
 class UserRegistrationError(Exception):
     """Making a custom validation error handler for this challenge"""
@@ -543,15 +565,15 @@ class UserRegistation(BaseModel):
         result_regular = re.match(username_pattern, value)
 
         if not result_regular:
-            raise UserRegistrationError(message='Username error: only allowed lowercase and underscore.')
+            raise UserRegistrationError(message={'Username_error': 'only allowed lowercase and underscore.'})
                                         
         start, end = result_regular.span()
 
         if value != value[start: end]:
-            raise UserRegistrationError(message='Username error: only allowed lowercase and underscore.')
+            raise UserRegistrationError(message={'Username_error': 'only allowed lowercase and underscore.'})
         
         if len(value) < 3 or len(value) > 30:
-            raise UserRegistrationError(message='Username error: max lenght between 3-30 characters only.')
+            raise UserRegistrationError(message={'Username_error': 'max lenght between 3-30 characters only.'})
         
         return value
 
@@ -561,7 +583,7 @@ class UserRegistation(BaseModel):
     def password_validation(cls, value):
         """making a password validation entrance"""
         if len(value) <= 8:
-            raise UserRegistrationError(message='The password must have at least 8 characters.')
+            raise UserRegistrationError(message={'Password_error': 'The password must have at least 8 characters.'})
         
         password_pattern = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$' # REMEMBER THAT "=?" ALLOWS US TO SEARCH
         # WITHOUT SPENDING CHARACTERS, WHICH IS GOOD FOR THIS PURPOSE.
@@ -571,12 +593,12 @@ class UserRegistation(BaseModel):
         result_for_regular = re.search(password_pattern, value)
         if not result_for_regular:
             raise UserRegistrationError(value=value, 
-                                        message='Password error: the password does not fit the requirement.')
+                                        message={'Password_error': 'the password does not fit the requirement.'})
         
         start, end = result_for_regular.span()
         if value != value[start: end]:
             raise UserRegistrationError(value=value, 
-                                        message='Password error: the password does not fit the requirement.')
+                                        message={'Password_error': 'the password does not fit the requirement.'})
 
         return value
     
@@ -590,10 +612,10 @@ class UserRegistation(BaseModel):
         pattern_result = re.findall(email_pattern, value)
 
         if not pattern_result:
-            raise UserRegistrationError(message='email_error: the email does not match the requirements.')
+            raise UserRegistrationError(message={'email_error': 'the email does not match the requirements.'})
         
         if len(pattern_result[0]) != len(value):
-            raise UserRegistrationError(message='email_error: the email does not match the requirements.')
+            raise UserRegistrationError(message={'email_error': 'the email does not match the requirements.'})
 
         return value
     
