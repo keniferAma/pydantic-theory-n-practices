@@ -667,3 +667,67 @@ parts of the string, while 'match' will gives ud the entire ocurrences, from the
 it doesn't match what is inside of the parentesis first)""" 
 result = re.findall(pattern_to_practice, 'kenifer@gmail.edu.co')
 print(result)
+
+
+
+
+# Product inventory #
+
+
+"""2. **Exercise 2: Product Inventory**
+   - Create a `Product` model with fields: `product_id`, `product_name`, `product_category`, `price`, and `quantity_in_stock`.
+   - The `product_id` should be a unique identifier.
+   - The `product_name` should be a string and cannot be empty.
+   - The `product_category` should be one of the following: 'Electronics', 'Clothing', 'Grocery'.
+   - The `price` should be a positive float.
+   - The `quantity_in_stock` should be a positive integer.
+   - Use a JSON file named `product_inventory.json` to test your model.
+"""
+
+
+inventory_path = 'C:/Users/kenifer/Desktop/pruebas-json/products.json'
+
+try:
+    with open(inventory_path, encoding='utf8') as inventory_file:
+        inventory_information = json.load(inventory_file)
+
+except FileNotFoundError:
+    print(f'The file {inventory_path} does not exist.')
+
+
+class InventoryErrors(Exception):
+    def __init__(self, value=None, message=None):
+        self.value = value
+        self.message = message
+
+
+class ProductInventory(BaseModel):
+    product_id: int 
+    product_name: str = Field(min_length=1)
+    product_category: str
+    price: float
+    quantity_in_stock: int
+
+    @field_validator('product_id')
+    @classmethod
+    def product_id_validator(cls, value):
+        """creating the logic for product_id validator"""
+
+        return value
+    
+    @field_validator('product_name')
+    @classmethod
+    def product_name_validator(cls, value):
+        """Doing the logic for the product_name validator"""
+
+        return value
+
+try:
+    class_information: List[ProductInventory] = [ProductInventory(**item) for item in inventory_information['products']]
+    print(class_information[3].product_name)
+
+except ValidationError as msj:
+    print(msj.title)
+
+
+    
