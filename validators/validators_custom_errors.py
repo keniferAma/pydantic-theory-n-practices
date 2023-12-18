@@ -27,3 +27,10 @@ except ValidationError as e:
     x
       84 is the answer! [type=the_answer_error, input_value=84, input_type=int]
     """
+
+
+"""When you instantiate PydanticCustomError, you need to provide three arguments1:
+
+error_type: A string that represents the type of error.
+message_template: A string that serves as a template for the error message.
+context: An optional dictionary that can contain additional context for the error."""
