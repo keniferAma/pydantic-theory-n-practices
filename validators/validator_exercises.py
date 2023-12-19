@@ -684,6 +684,7 @@ print(result)
    - Use a JSON file named `product_inventory.json` to test your model.
 """
 
+from pydantic import field_validator, Field
 from typing import Literal
 from typing_extensions import Literal
 from pydantic import PositiveFloat, PositiveInt
@@ -711,12 +712,9 @@ class ProductInventory(BaseModel):
     price: PositiveFloat
     quantity_in_stock: PositiveInt
 
-    @field_validator('product_id')
+    @field_validator('product_id') # Couldn't solve this validation because of the ORM lack of knowledges.
     @classmethod
     def product_id_validator(cls, value):
-        """creating the logic for product_id validator"""
-        res = ProductInventory
-        
         return value
         
 
@@ -742,6 +740,3 @@ except ValidationError as msj:
     print(msj)
 
 
-lista = [1, 2, 3, 4]
-restu = filter(lambda i: i % 2 == 0, lista)
-print(list(restu))
