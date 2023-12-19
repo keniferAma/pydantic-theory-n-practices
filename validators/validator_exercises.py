@@ -684,6 +684,9 @@ print(result)
    - Use a JSON file named `product_inventory.json` to test your model.
 """
 
+from typing import Literal
+from typing_extensions import Literal
+from pydantic import PositiveFloat, PositiveInt
 
 inventory_path = 'C:/Users/kenifer/Desktop/pruebas-json/products.json'
 
@@ -703,31 +706,42 @@ class InventoryErrors(Exception):
 
 class ProductInventory(BaseModel):
     product_id: int 
-    product_name: str = Field(min_length=1)
-    product_category: str
-    price: float
-    quantity_in_stock: int
+    product_name: str 
+    product_category: Literal['Electronics', 'Grocery', 'Clothing']
+    price: PositiveFloat
+    quantity_in_stock: PositiveInt
 
     @field_validator('product_id')
     @classmethod
     def product_id_validator(cls, value):
         """creating the logic for product_id validator"""
-
+        res = ProductInventory
+        
         return value
-    
+        
+
     @field_validator('product_name')
     @classmethod
     def product_name_validator(cls, value):
         """Doing the logic for the product_name validator"""
+        if len(value) <= 1:
+            raise PydanticCustomError(
+                'string_length_error',
+                'String must have at least 1 character!',
+                {'input_string': value})
 
         return value
+    
+    
 
 try:
     class_information: List[ProductInventory] = [ProductInventory(**item) for item in inventory_information['products']]
-    print(class_information[3].product_name)
+    print(class_information)
 
 except ValidationError as msj:
-    print(msj.title)
+    print(msj)
 
 
-    
+lista = [1, 2, 3, 4]
+restu = filter(lambda i: i % 2 == 0, lista)
+print(list(restu))
