@@ -740,3 +740,42 @@ except ValidationError as msj:
     print(msj)
 
 
+
+
+# BOOK COLLECTION #
+    
+"""3. **Exercise 3: Book Collection**
+   - Create a `Book` model with fields: `isbn`, `title`, `author`, `publication_date`, and `pages`.
+   - The `isbn` should be a valid ISBN-10 or ISBN-13 number.
+   - The `title` and `author` should be strings and cannot be empty.
+   - The `publication_date` should be a date and cannot be in the future.
+   - The `pages` should be a positive integer.
+   - Use a JSON file named `book_collection.json` to test your model."""
+
+from pydantic import BaseModel, Field, field_validator
+from fastapi import HTTPException, status, FastAPI
+
+
+book_collection_path = 'C:/Users/kenifer/Desktop/pruebas-json/books.json'
+
+app = FastAPI()
+
+@app.get('/openfile')
+async def open_file():
+    try:
+        book_file = open(book_collection_path)
+        json_file = json.load(book_file)
+
+    except FileNotFoundError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='The file was not found.')
+    
+    return json_file
+
+
+class BookCollection(BaseModel):
+    isbn: int
+    title: str
+    author: str
+    publication_date: datetime
+    pages: int
+
