@@ -758,6 +758,7 @@ from fastapi import HTTPException, status, FastAPI
 
 book_collection_path = 'C:/Users/kenifer/Desktop/pruebas-json/books.json'
 
+# doing some practices with fastapi #
 app = FastAPI()
 
 @app.get('/openfile')
@@ -772,6 +773,15 @@ async def open_file():
     return json_file
 
 
+try:
+    book_file = open(book_collection_path)
+    json_file = json.load(book_file)
+
+except FileNotFoundError:
+    print('The file was not found')
+
+
+
 class BookCollection(BaseModel):
     isbn: int
     title: str
@@ -779,3 +789,8 @@ class BookCollection(BaseModel):
     publication_date: datetime
     pages: int
 
+try:
+    books_information_class: List[BookCollection] = [BookCollection(**item) for item in json_file]
+
+except ValidationError as message:
+    print(message)
