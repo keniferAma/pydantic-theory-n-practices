@@ -783,12 +783,68 @@ except FileNotFoundError:
 
 
 class BookCollection(BaseModel):
-    isbn: int
+    """class to handle the books validation"""
+    isbn: str
     title: str
     author: str
-    publication_date: datetime
+    publication_date: str
     pages: int
 
+    @field_validator('isbn')
+    @classmethod
+    def isbn_validator(cls, value):
+        cleaned_isbn = [item for item in value if item in '1234567890Xx']
+
+        if len(cleaned_isbn) != 10 and len(cleaned_isbn) != 13: 
+            raise PydanticCustomError(
+                'isbn_error',
+                'It is not a valid isbn identifier.'
+            )
+        
+        def str_to_int(character: str) -> int:
+            """function to convert strings into integers"""
+            if character in 'Xx':
+                return 10
+            return int(character)
+        
+        if len(cleaned_isbn) == 10:
+            result_isbn_10 = sum(str_to_int(character) * (10 - index) for index, character in enumerate(cleaned_isbn))
+            
+            if result_isbn_10 % 11 != 0:
+                raise PydanticCustomError(
+                    'isbn-10_error',
+                    'The isbn-10 identifier is not valid.',
+                    {'v': value}
+                )
+            
+        if len(cleaned_isbn) == 13:
+
+            if cleaned_isbn[:3] != ['9', '7', '8']:
+                print(cleaned_isbn[:3])
+                raise PydanticCustomError(
+                    'isbn-13_error',
+                    'The isbn-13 identifier is not valid ("978").',
+                    {'v': value}
+                )
+            
+            result_isbn_13 = 0
+
+            for index, character in enumerate(cleaned_isbn):
+                if index% 2 == 0:
+                    result_isbn_13 += str_to_int(character) 
+                else:
+                    result_isbn_13 += str_to_int(character) * 3
+
+            if result_isbn_13 % 10 != 0:
+                raise PydanticCustomError(
+                    'isbn-13_error',
+                    'The isbn-13 identifier is not valid.',
+                    {'v': value}
+                )
+
+
+        return value
+    
 try:
     books_information_class: List[BookCollection] = [BookCollection(**item) for item in json_file]
 
