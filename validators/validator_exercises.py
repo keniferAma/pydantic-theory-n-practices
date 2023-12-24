@@ -785,9 +785,9 @@ except FileNotFoundError:
 class BookCollection(BaseModel):
     """class to handle the books validation"""
     isbn: str
-    title: str
-    author: str
-    publication_date: str
+    title: str = Field(min_length=1)
+    author: str = Field(min_length=1)
+    publication_date: date
     pages: int
 
     @field_validator('isbn')
@@ -845,6 +845,22 @@ class BookCollection(BaseModel):
 
         return value
     
+
+    @field_validator('publication_date')
+    @classmethod
+    def publication_date_validator(cls, value):
+        
+        dates_difference = date.today() - value # This is curious: the string in the json file, is converted into date.
+        if dates_difference.days < 0:
+            raise PydanticCustomError(
+                'actual_date_error', 
+                'The date is suggesting future.'
+            )
+
+        return value
+
+    
+
 try:
     books_information_class: List[BookCollection] = [BookCollection(**item) for item in json_file]
 
@@ -870,4 +886,5 @@ def validate_isbn13(isbn13):
     return check_digit == int(isbn13[-1])
 
 print(validate_isbn13("978-0-316-12346-9"))
+
 
