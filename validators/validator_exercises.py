@@ -850,3 +850,24 @@ try:
 
 except ValidationError as message:
     print(message)
+
+
+
+
+
+
+# an IA example of a function that identifies if a isbn-13 number is valid. #
+def validate_isbn13(isbn13):
+    check_digit = 0
+    for i, digit in enumerate(isbn13.replace("-", "")[:12]):
+        if i % 2 == 0:
+            check_digit += int(digit)
+        else:
+            check_digit += int(digit) * 3
+    check_digit %= 10
+    if check_digit != 0:
+        check_digit = 10 - check_digit
+    return check_digit == int(isbn13[-1])
+
+print(validate_isbn13("978-0-316-12346-9"))
+
