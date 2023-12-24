@@ -788,6 +788,7 @@ class BookCollection(BaseModel):
     title: str = Field(min_length=1)
     author: str = Field(min_length=1)
     publication_date: date
+    pages: int
 
     @field_validator('isbn')
     @classmethod
