@@ -752,7 +752,7 @@ except ValidationError as msj:
    - The `pages` should be a positive integer.
    - Use a JSON file named `book_collection.json` to test your model."""
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, PositiveInt
 from fastapi import HTTPException, status, FastAPI
 
 
@@ -788,7 +788,7 @@ class BookCollection(BaseModel):
     title: str = Field(min_length=1)
     author: str = Field(min_length=1)
     publication_date: date
-    pages: int
+    pages: PositiveInt
 
     @field_validator('isbn')
     @classmethod
