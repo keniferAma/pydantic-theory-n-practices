@@ -4,7 +4,7 @@
 
 from pydantic import (
     BaseModel,
-    FieldValidationInfo,
+    ValidationInfo, #The latest pydantic version deprecated 'FieldValidationInfo' and added 'ValidationInfo'
     ValidationError,
     field_validator,
 )
@@ -26,7 +26,7 @@ class UserModel(BaseModel):
     @classmethod
     # REMEMBER: First value is the "cls", second is the value (we can name it as we want)
     # and third if we want is FiedValidationInfo
-    def check_alphanumeric(cls, v: str, info: FieldValidationInfo) -> str:
+    def check_alphanumeric(cls, v: str, info: ValidationInfo) -> str:
         if isinstance(v, str):
             # info.field_name is the name of the field being validated
             is_alphanumeric = v.replace(' ', '').isalnum()
