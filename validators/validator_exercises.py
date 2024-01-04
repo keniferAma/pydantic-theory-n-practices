@@ -888,3 +888,43 @@ def validate_isbn13(isbn13):
 print(validate_isbn13("978-0-316-12346-9"))
 
 
+
+
+
+### some ValidationInfo exercises ###
+
+from pydantic import (
+    BaseModel, 
+    field_validator,
+    Field,
+    ValidationInfo,
+    ValidationError,
+    ConfigDict
+)
+from pydantic_core import PydanticCustomError
+
+
+
+class ValidationUserModel(BaseModel):
+    name: str
+    id: int
+
+    @field_validator('name')
+    @classmethod
+    def name_starts_with(cls, value: str, info: ValidationInfo):
+
+
+        if not value.startswith('Sa'):
+            print(info.data['id'])
+            raise PydanticCustomError(
+                'name_start_with_error',
+                'The name should start with "Sa"'
+            )
+        
+        return value
+
+try:
+    Sara = ValidationUserModel(name='ara', id=12)
+
+except ValidationError as msj:
+    print(msj)
