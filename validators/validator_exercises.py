@@ -912,10 +912,11 @@ class ValidationUserModel(BaseModel):
     @field_validator('name')
     @classmethod
     def name_starts_with(cls, value: str, info: ValidationInfo):
-
+        if info.data == 'json':
+                print('it is a json file.')
 
         if not value.startswith('Sa'):
-            print(info.data['id'])
+            
             raise PydanticCustomError(
                 'name_start_with_error',
                 'The name should start with "Sa"'
@@ -924,7 +925,7 @@ class ValidationUserModel(BaseModel):
         return value
 
 try:
-    Sara = ValidationUserModel(name='ara', id=12)
+    Sara = ValidationUserModel(name='Sara', id=12)
 
 except ValidationError as msj:
     print(msj)
