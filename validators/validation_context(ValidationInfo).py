@@ -87,3 +87,19 @@ except ValidationError as exc:
     """
 
 
+
+"""THESE ARE SOME OF THE FUNCTIONS WE HAVE IN ValidationInfo ONCE INSTANCED.
+*config: This attribute refers to the configuration settings of the Pydantic model1. 
+It allows you to customize the behavior of the model, such as how it handles extra attributes, 
+whether it’s mutable, and more1.
+
+*context: This attribute provides additional context that can be used during validation2. 
+It is often used to pass external information to the validator function2.
+
+*data: This attribute is a dictionary that contains the values of the fields that have been validated so far3. 
+It allows you to access the values of other fields during validation3.
+
+*field_name: This attribute is the name of the field being validated4. 
+It can be useful when you have a validator function that is used for multiple fields, 
+and you need to know which field is currently being validated4."""
+
