@@ -12,7 +12,8 @@ print(user)
 ### then, we are giving an index as second value, so once we give the arguments, the index 0 = first_name
 ### and the index 1 = last_name (on this case of course) ALL THIS IN CASE WE ARE PROVIDING LISTS AS DATA TO VALIDATE.
 ### ON THE OTHER HAND WE CAN USE JSON AND DICTIONARY DATA TO PARSING DATA.
-
+### SO THE AliasPath CONFIGURATION DEPENDS ON TYPE OF DATA STRUCTURE WE'RE PROVIDING (IF LISTS: INTEGER AS SECOND PARAMETER
+### AND IF DICTIONARIES: STRINGS FROM THE SECOND PARAMETER)
 
 
 # This is how regurarly a model_validate entry works.
@@ -40,6 +41,41 @@ print(a.logo_url)  # Output: 'foo'
 """For example, if your data looks like this: {'company': {'logo': {'url': 'foo'}}}, 
 you could use AliasPath('company', 'logo', 'url') to tell Pydantic to look for the 
 logo_url field at data['company']['logo']['url']."""
+
+
+
+
+### ANOTHER EXAMPLE OF AliasPath USES: ####
+"""{
+  "company": {
+    "name": "Tech Corp",
+    "location": "New York",
+    "employees": [
+      {
+        "id": 1,
+        "name": "John Doe",
+        "position": "Software Engineer",
+        "email": "johndoe@techcorp.com"
+      },
+      {
+        "id": 2,
+        "name": "Jane Smith",
+        "position": "Data Scientist",
+        "email": "janesmith@techcorp.com"
+      }
+    ]
+  }
+}
+In this example, the data is nested and hierarchical. The company has properties like name and location, 
+and it also has a list of employees. Each employee is represented as a dictionary with properties 
+like id, name, position, and email.
+
+If you were to create a Pydantic model for this data, you might use AliasPath to specify paths to the 
+fields in the nested data. For example, you could use AliasPath('company', 'employees', 0, 'name') to 
+specify the path to the name of the first employee."""
+
+
+
 
 
 ## AliasChoices ##
