@@ -1445,3 +1445,13 @@ except ValidationError as e:
     x
       84 is the answer! [type=the_answer_error, input_value=84, input_type=int]
     """
+
+
+
+class OptionalClass(BaseModel):
+    id: Optional[int] = Field(default=None)
+    name: str
+
+
+persona_optional = OptionalClass(name='alejandro')
+print(persona_optional)
