@@ -15,10 +15,10 @@ except ValidationError as m:
     print(m)
 """2 validation errors for NoExtraArguments
 name
-  String should have at most 5 characters [type=string_too_long, input_value='Miguel', input_type=str]       
+  String should have at most 5 characters [type=string_too_long, input_value='Miguel', input_type=str]
     For further information visit https://errors.pydantic.dev/2.5/v/string_too_long
 surname
-  String should have at most 5 characters [type=string_too_long, input_value='Cardona', input_type=str]      
+  String should have at most 5 characters [type=string_too_long, input_value='Cardona', input_type=str]
     For further information visit https://errors.pydantic.dev/2.5/v/string_too_long"""
 
 
@@ -44,10 +44,10 @@ except ValidationError as msj:
     print(msj)
 """2 validation errors for MyClass
 0 # Look this enum error managment of the dataclass.
-  String should have at most 5 characters [type=string_too_long, input_value='Abelardo', input_type=str]     
+  String should have at most 5 characters [type=string_too_long, input_value='Abelardo', input_type=str]
     For further information visit https://errors.pydantic.dev/2.5/v/string_too_long
 1
-  String should have at most 5 characters [type=string_too_long, input_value='Carmona', input_type=str]      
+  String should have at most 5 characters [type=string_too_long, input_value='Carmona', input_type=str]
     For further information visit https://errors.pydantic.dev/2.5/v/string_too_long"""
 
 
@@ -82,7 +82,7 @@ from dataclasses import dataclass
 
 @dataclass(kw_only=False)
 class MyOriginalDataclass:
-    name: str 
+    name: str
     surname: str
     age: int
 
@@ -98,7 +98,7 @@ except ValueError as ma:
 
 ### Extra ###
 class NoExtra(BaseModel):
-    model_config = ConfigDict(extra='forbid')
+    model_config = ConfigDict(extra='allow')
     name: str
     surname: str
     age: int
@@ -115,3 +115,45 @@ except ValidationError as msj:
     For further information visit https://errors.pydantic.dev/2.5/v/extra_forbidden"""
 # This output is indeed not allowing extra values.
 
+
+from dataclasses import dataclass
+
+@dataclass
+class DataclassClass:
+    name: str
+    surname: str
+    age: int
+
+
+class RegularClass:
+    def __init__(self, name: str, surname: str, age: int):
+        self.name = name
+        self.surname = surname
+        self.age = age
+
+
+class RegularBasemodel(BaseModel):
+    model_config = ConfigDict(from_attributes=True) 
+
+    name: str
+    surname: str
+    age: int
+
+
+class Information(BaseModel):
+    # model_config = ConfigDict(from_attributes=True) Not necessary on this class.
+
+    person: RegularBasemodel # we've set this hint class to receive the attributes information from whatever class type.
+    address: str
+
+
+regular_class_result = RegularClass(name='kenifer', surname='amariles', age=31)
+
+dataclass_result = DataclassClass(name='kenifer', surname='amariles', age=31)
+
+# giving a NOT BASEMODEL instance as 'person' argument.
+information_result = Information(person=regular_class_result, address='calle 2')
+information_result2 = Information(person=dataclass_result, address='calle 2')
+
+print(information_result.model_dump())
+print(information_result2.model_dump())
