@@ -143,7 +143,7 @@ class RegularBasemodel(BaseModel):
 class Information(BaseModel):
     # model_config = ConfigDict(from_attributes=True) Not necessary on this class.
 
-    person: RegularBasemodel # This class hint MUST be configured to receive the attributes from other sources. 
+    person: RegularBasemodel # we've set this hint class to receive the attributes information from whatever class type.
     address: str
 
 
